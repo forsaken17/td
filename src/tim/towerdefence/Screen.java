@@ -37,9 +37,11 @@ public class Screen extends JPanel implements Runnable {
 		this.frame = frame;
 		this.frame.addKeyListener(new KeyHandler(this));
 		this.frame.addMouseListener(new MouseHandler(this));
+		this.frame.addMouseMotionListener(new MouseHandler(this));
+
 		double width = this.frame.getWidth();
 		double height = this.frame.getHeight();
-		System.out.println(width+":"+height);
+		System.out.println(width + ":" + height);
 		towerWidth = width / 27.32;
 		towerHeight = height / 15.36;
 	}
@@ -66,8 +68,8 @@ public class Screen extends JPanel implements Runnable {
 							+ (y * (int) towerHeight), (int) towerWidth,
 							(int) towerHeight, null);
 					g.drawRect((int) towerWidth + (x * (int) towerWidth),
-							(int) towerHeight + (y * (int) towerHeight), (int) towerWidth,
-							(int) towerHeight);
+							(int) towerHeight + (y * (int) towerHeight),
+							(int) towerWidth, (int) towerHeight);
 				}
 			}
 			// stats
@@ -99,6 +101,49 @@ public class Screen extends JPanel implements Runnable {
 					g.drawRect(300 + (x * (int) towerWidth),
 							600 + (y * (int) towerHeight), (int) towerWidth,
 							(int) towerHeight);
+				}
+			}
+			// tower on grid
+			for (int x = 0; x < 22; x++) {
+				for (int y = 0; y < 11; y++) {
+					if (towerMap[x][y] != null) {
+						g.setColor(Color.GRAY);
+						g.drawOval(
+								(int) towerWidth
+										+ (x * (int) towerWidth)
+										- (towerMap[x][y].range * 2
+												* (int) towerWidth + (int) towerWidth)
+										/ 2 + (int) towerWidth / 2,
+								(int) towerHeight
+										+ (y * (int) towerHeight)
+										- (towerMap[x][y].range * 2
+												* (int) towerHeight + (int) towerHeight)
+										/ 2 + (int) towerHeight / 2,
+								towerMap[x][y].range * 2 * (int) towerWidth
+										+ (int) towerWidth,
+								towerMap[x][y].range * 2 * (int) towerHeight
+										+ (int) towerHeight);
+						g.setColor(new Color(64, 64, 64, 64));
+						g.fillOval(
+								(int) towerWidth
+										+ (x * (int) towerWidth)
+										- (towerMap[x][y].range * 2
+												* (int) towerWidth + (int) towerWidth)
+										/ 2 + (int) towerWidth / 2,
+								(int) towerHeight
+										+ (y * (int) towerHeight)
+										- (towerMap[x][y].range * 2
+												* (int) towerHeight + (int) towerHeight)
+										/ 2 + (int) towerHeight / 2,
+								towerMap[x][y].range * 2 * (int) towerWidth
+										+ (int) towerWidth,
+								towerMap[x][y].range * 2 * (int) towerHeight
+										+ (int) towerHeight);
+						g.drawImage(Tower.towerList[towerMap[x][y].id].texture,
+								(int) towerWidth + (x * (int) towerWidth),
+								(int) towerHeight + (y * (int) towerHeight),
+								(int) towerWidth, (int) towerHeight, null);
+					}
 				}
 			}
 			// hand
@@ -192,13 +237,16 @@ public class Screen extends JPanel implements Runnable {
 	}
 
 	public void placeTower(int x, int y) {
-		int xPos = (x - (int) towerWidth) / (int) towerWidth;
-		int yPos = (y - (int) towerHeight) / (int) towerHeight;
-		if (xPos > 22 || yPos > 14) {
+		int xPos = x / (int) towerWidth;
+		int yPos = y / (int) towerHeight;
 
-		} else if (towerMap[xPos][yPos] == null && map[xPos][yPos] == 0) {
-			user.player.money -= Tower.towerList[hand - 1].cost;
-			towerMap[xPos][yPos] = Tower.towerList[hand - 1];
+		if (xPos > 0 && xPos <= 22 && yPos <= 14 && yPos > 0) {
+			xPos -= 1;
+			yPos -= 1;
+			if (towerMap[xPos][yPos] == null && map[xPos][yPos] == 0) {
+				user.player.money -= Tower.towerList[hand - 1].cost;
+				towerMap[xPos][yPos] = Tower.towerList[hand - 1];
+			}
 		}
 	}
 
@@ -218,9 +266,6 @@ public class Screen extends JPanel implements Runnable {
 		return 600 + (2 * (int) towerHeight);
 	}
 
-	public void mouseMoved(MouseEvent e) {
-		startGame(user, "Level1");
-	}
 
 	public class MouseHeld {
 		boolean mouseDown = false;
@@ -260,7 +305,6 @@ public class Screen extends JPanel implements Runnable {
 		}
 
 		public void mouseMoved(MouseEvent e) {
-
 			handXPos = e.getXOnScreen();
 			handYPos = e.getYOnScreen();
 		}
